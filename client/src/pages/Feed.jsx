@@ -3,6 +3,7 @@ import { assets, dummyPostsData  } from '../assets/assets'
 import { Loading } from "../components/Loading";
 import StoriesBar from "../components/StoriesBar";
 import PostCard from "../components/PostCard";
+import RecentMessages from "../components/RecentMessages";
 
 
 const Feed = () => {
@@ -49,7 +50,7 @@ const Feed = () => {
                     easy-to-use plateform built for results.
                   </p>
              </div>
-             <h1>Recent messages</h1>
+            <RecentMessages />
           </div>
       </div>
     ) : <Loading/>
