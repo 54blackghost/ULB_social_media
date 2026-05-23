@@ -32,8 +32,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen}) => {
           </Link>
         </div>
 
-
-        <div className="w-full border-t border-gray-200 p-4 px-7 flex-items-center justify-between">
+         <br /><br /><br /><br /><br /><br /><br /><br /><br />
+        <div className="w-full border-t border-gray-200 p-4 px-7 flex items-center justify-between">
           <div className="flex gap-2 items-center cursor-pointer">
             <UserButton />
             <div>
@@ -41,10 +41,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen}) => {
               <p className='text-xs text-gray-500'>@{user.username}</p>
             </div>
           </div>
-
-          <br />
-          <LogOut onClick={signOut} className='w-4.5 text-gray-400 hover:text-gray-700 transition 
-          cursor-pointer'/>
+           
+           <LogOut onClick={signOut} className='w-5 right-10  text-gray-400 hover:text-gray-700 transition 
+             cursor-pointer'/>
         </div>
     </div>
   )
