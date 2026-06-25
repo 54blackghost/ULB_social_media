@@ -1,4 +1,6 @@
 import User from "../models/User";
+import client from "../configs/imagesKit.js";
+import fs from "fs";
 
 
 // Get User Data using userId
@@ -40,8 +42,111 @@ export const updateUserData = async (req, res) => {
             location,
             full_name
         };
+
+        const profile = req.files.profile && req.files.profile[0]
+        const cover = req.files.cover && req.files.cover[0]
+
+        if(profile){
+            const buffer = fs.readFileSync(profile.path);
+            const response = await client.files.upload({
+                file: buffer,
+                fileName: profile.originalname,
+            });
+            
+            const url = client.url({
+                path: response.filePath,
+                transformation: [
+                    {quality: "auto"},
+                    {format: "webp"},
+                    {width: "512"},
+
+                    ],
+            });
+            updateData.profile_picture = url;
+        }
+
+
+        if(cover){
+            const buffer = fs.readFileSync(cover.path);
+            const response = await client.files.upload({
+                file: buffer,
+                fileName: cover.originalname,
+            });
+            
+            const url = client.url({
+                path: response.filePath,
+                transformation: [
+                    {quality: "auto"},
+                    {format: "webp"},
+                    {width: "1280"},
+
+                    ],
+            });
+            updateData.cover_photo = url;
+        }
+
+        const user =  await User.findByIdAndUpdate(userId, updateData, {new: true});
+        
+        res.json({success: true, user, message: "Profile updated successfully"});
+
+
     } catch (error) {
         console.error(error);
         res.json({success: false, message: error.message});
     }
 }
+
+
+//find Users using username, email, name, location
+export const discoverUsers = async (req, res) => {
+    try {
+        const {userId} = await req.auth();
+        const {input} = req.body;
+
+        const allUsers = await User.find(
+            {
+                $or: [
+                    {username: new RegExp(input, 'i')},
+                    {email: new RegExp(input, 'i')},
+                    {full_name: new RegExp(input, 'i')},
+                    {location: new RegExp(input, 'i')},
+                ]
+            }
+        )
+        const filteredUsers = allUsers.filter(user => user._id !== userId);
+        res.json({success: true, users: filteredUsers});
+    } catch (error) {
+        console.error(error);
+        res.json({success: false, message: error.message});
+    }
+}
+
+//Follow User
+export const followUser = async (req, res) => {
+    try {
+        const {userId} = await req.auth();
+        const {id} = req.body;
+
+        const user = await User.findById(userId);
+
+        if(user.following.includes(id)){
+            return res.json({success: false, message: 'You are already following this user'});
+        }    
+
+        user.following.push(id);
+        await user.save();
+
+        const toUser = await User.findById(id);
+        toUser.followers.push(userId);
+        await toUser.save();
+
+        res.json({success: true, message: 'User followed successfully'});
+
+  
+    } catch (error) {
+        console.error(error);
+        res.json({success: false, message: error.message});
+    }
+}
+
+//Unfollow User
